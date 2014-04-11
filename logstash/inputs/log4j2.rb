@@ -50,8 +50,8 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
     require "jruby/serialization"
 
     if __FILE__ !~ /^(jar:)?file:\/\//
-      if File.exists?(File.dirname(__FILE__)+"/Log4jExtension-0.2.0.jar")
-        require File.dirname(__FILE__)+"/Log4jExtension-0.2.0.jar"
+      if File.exists?(File.dirname(__FILE__)+"/Log4jExtension-0.3.0.jar")
+        require File.dirname(__FILE__)+"/Log4jExtension-0.3.0.jar"
       end
     end
 
@@ -82,8 +82,8 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
         event["file"] = log4j_obj.location.getFileName + ":" + log4j_obj.location.getLineNumber.to_s
         event["method"] = log4j_obj.location.getMethodName
         
-        event["thrown"] = log4j_obj.throwable.toString if log4j_obj.throwable
-        event["stack_trace"] = log4j_obj.throwable.getStackTrace.to_a.join("\n") if log4j_obj.throwable
+        event["thrown"] = log4j_obj.throwableName if log4j_obj.throwableName
+        event["stack_trace"] = log4j_obj.throwableStack if log4j_obj.throwableStack
         
         # Add the context properties to '@fields'
         if log4j_obj.contextMap
@@ -97,6 +97,7 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
         output_queue << event
       end # loop do
     rescue => e
+    @logger.debug(e)
       @logger.debug("Closing connection", :client => socket.peer,
                     :exception => e)
     rescue Timeout::Error
