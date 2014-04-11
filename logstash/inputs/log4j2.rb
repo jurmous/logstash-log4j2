@@ -71,7 +71,7 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
       loop do
         # NOTE: event_raw is jurmous.log4j.SimpleLogEvent
    		log4j_obj = ois.readObject
-        event = LogStash::Event.new("message" => log4j_obj.message)
+        event = LogStash::Event.new("message" => log4j_obj.message, LogStash::Event::TIMESTAMP => Time.at(log4j_obj.timestamp/1000,log4j_obj.timestamp%1000*1000).gmtime)
         decorate(event)
         event["host"] = socket.peer
 		event["marker"] = log4j_obj.marker if log4j_obj.marker
