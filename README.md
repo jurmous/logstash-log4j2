@@ -13,7 +13,7 @@ Setup log4j2
 Set log4j2.xml in your project
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration packages="jurmous.log4j">
+<Configuration>
     <Appenders>
         <Socket name="A1" host="localHost" port="7000">
             <SerializedLayout />
