@@ -16,7 +16,7 @@ Set log4j2.xml in your project
 <Configuration packages="jurmous.log4j">
     <Appenders>
         <Socket name="A1" host="localHost" port="7000">
-            <SerializedLogEventLayout />
+            <SerializedLayout />
         </Socket>
     </Appenders>
     <Loggers>
