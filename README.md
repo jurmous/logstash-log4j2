@@ -10,8 +10,6 @@ Download the latest release at: https://github.com/jurmous/logstash-log4j2/relea
 Setup log4j2
 ------------
 
-Add the included `Log4jExtension-0.2.0.jar` to your classpath. (Or your own maven repository)
-
 Set log4j2.xml in your project
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -49,8 +47,3 @@ Run logstash with the plugin
 -------------
 
 Run from your logstash install directory `./bin/logstash --pluginpath PATH_TO_PLUGIN -f YOUR_CONF.conf`
-
-
-Related project
---------------
-https://github.com/jurmous/log4jextensions - Source of the serialization jar.
