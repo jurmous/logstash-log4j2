@@ -3,6 +3,10 @@ logstash-log4j2
 
 Log4j2 plugin for logstash.
 
+Supported Log4J2 versions:
+-----
+Version: 2.0-rc2 (And probably newer 2.x releases) 
+
 Get the plugin
 ----
 Download the latest release at: https://github.com/jurmous/logstash-log4j2/releases and unzip it.
