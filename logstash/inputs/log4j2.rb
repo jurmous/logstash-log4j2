@@ -46,14 +46,14 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
     require "jruby/serialization"
 
     begin
-			if __FILE__ !~ /^(jar:)?file:\/\//
-		  	if File.exists?(File.dirname(__FILE__)+"/log4j-api-2.0.jar")
- 					require File.dirname(__FILE__)+"/log4j-api-2.0.jar"
- 		  	end
-		  	if File.exists?(File.dirname(__FILE__)+"/log4j-core-2.0.jar")
-					require File.dirname(__FILE__)+"/log4j-core-2.0.jar"
-		  	end
-		  end
+      if __FILE__ !~ /^(jar:)?file:\/\//
+        if File.exists?(File.dirname(__FILE__)+"/log4j-api-2.0.jar")
+          require File.dirname(__FILE__)+"/log4j-api-2.0.jar"
+        end
+        if File.exists?(File.dirname(__FILE__)+"/log4j-core-2.0.jar")
+          require File.dirname(__FILE__)+"/log4j-core-2.0.jar"
+        end
+      end
       Java::OrgApacheLoggingLog4jCoreImpl.const_get("Log4jLogEvent")
     rescue
        raise(LogStash::PluginLoadingError, "Log4j2 java library not loaded")
@@ -66,9 +66,21 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
     @logger.info("Log4j input")
   end # def register
 
+  private 
+  def prettyPrintEntireStackTrace(proxy)
+    indentation = "\n\t"
+    a = proxy.getName + " " + proxy.getMessage + indentation
+    a += proxy.getExtendedStackTrace.to_a.join(indentation)
+    while (b = proxy.getCauseProxy)
+      a += "\nCaused by: " + b.getName + " " + b.getMessage + indentation + b.getExtendedStackTrace.to_a.join(indentation)
+      proxy = b 
+    end        
+    return a
+  end
+
   private
   def handle_socket(socket, output_queue)
-    begin   	
+    begin     
     
       # JRubyObjectInputStream uses JRuby class path to find the class to de-serialize to
       ois = JRubyObjectInputStream.new(java.io.BufferedInputStream.new(socket.to_inputstream))
@@ -95,18 +107,14 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
 
         proxy = log4j_obj.getThrownProxy
         if proxy
-          a = proxy.getExtendedStackTrace.to_a.join("\n")
-          while (b = proxy.getCauseProxy)
-            a += "\nCaused by: " + b.getExtendedStackTrace.to_a.join("\n")
-            proxy = b 
-          end        
-          event["stack_trace"] = a
+          event["stack_trace"] = prettyPrintEntireStackTrace(proxy)
         end
+
         event["cstack"] = log4j_obj.getContextStack.to_a if log4j_obj.getContextStack  
         output_queue << event
       end # loop do
     rescue => e
-    	@logger.debug(e)
+      @logger.debug(e)
       @logger.debug("Closing connection", :client => socket.peer,
                     :exception => e)
     rescue Timeout::Error
