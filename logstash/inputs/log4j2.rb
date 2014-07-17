@@ -68,8 +68,8 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
 
   private 
   def prettyPrintEntireStackTrace(proxy)
-    indentation = "\n\t"
-    a = proxy.getName + " " + proxy.getMessage + indentation
+    indentation = "\n\t"                
+    a = proxy.getName + " " + proxy.getMessage.to_s + indentation
     a += proxy.getExtendedStackTrace.to_a.join(indentation)
     while (b = proxy.getCauseProxy)
       a += "\nCaused by: " + b.getName + " " + b.getMessage + indentation + b.getExtendedStackTrace.to_a.join(indentation)
