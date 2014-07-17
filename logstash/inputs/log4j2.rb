@@ -47,11 +47,11 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
 
     begin
 			if __FILE__ !~ /^(jar:)?file:\/\//
-		  	if File.exists?(File.dirname(__FILE__)+"/log4j-api-2.0-rc2.jar")
- 					require File.dirname(__FILE__)+"/log4j-api-2.0-rc2.jar"
+		  	if File.exists?(File.dirname(__FILE__)+"/log4j-api-2.0.jar")
+ 					require File.dirname(__FILE__)+"/log4j-api-2.0.jar"
  		  	end
-		  	if File.exists?(File.dirname(__FILE__)+"/log4j-core-2.0-rc2.jar")
-					require File.dirname(__FILE__)+"/log4j-core-2.0-rc2.jar"
+		  	if File.exists?(File.dirname(__FILE__)+"/log4j-core-2.0.jar")
+					require File.dirname(__FILE__)+"/log4j-core-2.0.jar"
 		  	end
 		  end
       Java::OrgApacheLoggingLog4jCoreImpl.const_get("Log4jLogEvent")
@@ -86,17 +86,23 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
         event["class"] = log4j_obj.getSource().getClassName
         event["file"] = log4j_obj.getSource().getFileName + ":" + log4j_obj.getSource().getLineNumber.to_s
         event["method"] = log4j_obj.getSource().getMethodName
-        event["stack_trace"] = log4j_obj.getThrownProxy.getExtendedStackTrace.to_a.join("\n") if log4j_obj.getThrownProxy
-
         # Add the context properties to '@fields'
         if log4j_obj.contextMap
           log4j_obj.contextMap.keySet.each do |key|
             event["cmap_"+key] = log4j_obj.contextMap.get(key)
           end  
         end
-        
-        event["cstack"] = log4j_obj.getContextStack.to_a if log4j_obj.getContextStack  
 
+        proxy = log4j_obj.getThrownProxy
+        if proxy
+          a = proxy.getExtendedStackTrace.to_a.join("\n")
+          while (b = proxy.getCauseProxy)
+            a += "\nCaused by: " + b.getExtendedStackTrace.to_a.join("\n")
+            proxy = b 
+          end        
+          event["stack_trace"] = a
+        end
+        event["cstack"] = log4j_obj.getContextStack.to_a if log4j_obj.getContextStack  
         output_queue << event
       end # loop do
     rescue => e
