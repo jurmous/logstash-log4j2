@@ -107,7 +107,7 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
 
         proxy = log4j_obj.getThrownProxy
         if proxy
-          event["stack_trace"] = prettyPrintEntireStackTrace(proxy)
+          event["stack_trace"] = pretty_print_stack_trace(proxy)
         end
 
         event["cstack"] = log4j_obj.getContextStack.to_a if log4j_obj.getContextStack  
