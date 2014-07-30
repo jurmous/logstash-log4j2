@@ -80,8 +80,7 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
 
   private
   def handle_socket(socket, output_queue)
-    begin     
-    
+    begin    
       # JRubyObjectInputStream uses JRuby class path to find the class to de-serialize to
       ois = JRubyObjectInputStream.new(java.io.BufferedInputStream.new(socket.to_inputstream))
       loop do
@@ -95,9 +94,11 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
         event["priority"] = log4j_obj.getLevel.toString
         event["logger_name"] = log4j_obj.getLoggerName
         event["thread"] = log4j_obj.getThreadName
-        event["class"] = log4j_obj.getSource().getClassName
-        event["file"] = log4j_obj.getSource().getFileName + ":" + log4j_obj.getSource().getLineNumber.to_s
-        event["method"] = log4j_obj.getSource().getMethodName
+        if log4j_obj.getSource()
+	        event["class"] = log4j_obj.getSource().getClassName
+  	      event["file"] = log4j_obj.getSource().getFileName + ":" + log4j_obj.getSource().getLineNumber.to_s
+    	    event["method"] = log4j_obj.getSource().getMethodName
+        end
         # Add the context properties to '@fields'
         if log4j_obj.contextMap
           log4j_obj.contextMap.keySet.each do |key|
