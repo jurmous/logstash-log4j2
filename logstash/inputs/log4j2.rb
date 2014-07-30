@@ -95,9 +95,9 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
         event["logger_name"] = log4j_obj.getLoggerName
         event["thread"] = log4j_obj.getThreadName
         if log4j_obj.getSource()
-	        event["class"] = log4j_obj.getSource().getClassName
-  	      event["file"] = log4j_obj.getSource().getFileName + ":" + log4j_obj.getSource().getLineNumber.to_s
-    	    event["method"] = log4j_obj.getSource().getMethodName
+          event["class"] = log4j_obj.getSource().getClassName
+          event["file"] = log4j_obj.getSource().getFileName + ":" + log4j_obj.getSource().getLineNumber.to_s
+          event["method"] = log4j_obj.getSource().getMethodName
         end
         # Add the context properties to '@fields'
         if log4j_obj.contextMap
