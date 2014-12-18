@@ -1,13 +1,13 @@
 Gem::Specification.new do |s|
 
   s.name            = 'logstash-input-log4j2'
-  s.version         = '3.2'
+  s.version         = '3.3'
   s.licenses        = ['Apache License (2.0)']
   s.summary         = "$summary"
   s.description     = "This gem is a logstash plugin required to be installed on top of the Logstash core pipeline using $LS_HOME/bin/plugin install gemname. This gem is not a stand-alone program"
   s.authors         = ["Jurriaan Mous"]
-  s.email           = ''
-  s.homepage        = "http://www.elasticsearch.org/guide/en/logstash/current/index.html"
+  s.email           = 'jurmous@jurmo.us'
+  s.homepage        = "https://github.com/jurmous/logstash-log4j2"
   s.require_paths = ["lib"]
 
   # Files
