@@ -46,14 +46,10 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
     require "jruby/serialization"
 
     begin
-      if __FILE__ !~ /^(jar:)?file:\/\//
-        if File.exists?(File.dirname(__FILE__)+"/log4j-api-2.0.jar")
-          require File.dirname(__FILE__)+"/log4j-api-2.0.jar"
-        end
-        if File.exists?(File.dirname(__FILE__)+"/log4j-core-2.0.jar")
-          require File.dirname(__FILE__)+"/log4j-core-2.0.jar"
-        end
-      end
+      vendor_dir = ::File.expand_path("../../../vendor/", ::File.dirname(__FILE__))
+      require File.join(vendor_dir, "log4j-api-2.1.jar")
+      require File.join(vendor_dir, "log4j-core-2.1.jar")
+
       Java::OrgApacheLoggingLog4jCoreImpl.const_get("Log4jLogEvent")
     rescue
        raise(LogStash::PluginLoadingError, "Log4j2 java library not loaded")
@@ -66,7 +62,7 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
     @logger.info("Log4j input")
   end # def register
 
-  private 
+  private
   def pretty_print_stack_trace(proxy)
     indentation = "\n\t"
     result = "#{proxy.getName}: #{proxy.getMessage.to_s}#{indentation}#{proxy.getExtendedStackTrace.to_a.join(indentation)}"
@@ -74,13 +70,13 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
     while cause
       result += "\nCaused by: #{cause.getName}: #{cause.getMessage.to_s}#{indentation}#{cause.getExtendedStackTrace.to_a.join(indentation)}"
       cause = cause.getCauseProxy
-    end        
+    end
     result
   end
 
   private
   def handle_socket(socket, output_queue)
-    begin    
+    begin
       # JRubyObjectInputStream uses JRuby class path to find the class to de-serialize to
       ois = JRubyObjectInputStream.new(java.io.BufferedInputStream.new(socket.to_inputstream))
       loop do
@@ -103,7 +99,7 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
         if log4j_obj.contextMap
           log4j_obj.contextMap.keySet.each do |key|
             event["cmap_"+key] = log4j_obj.contextMap.get(key)
-          end  
+          end
         end
 
         proxy = log4j_obj.getThrownProxy
@@ -111,7 +107,7 @@ class LogStash::Inputs::Log4j2 < LogStash::Inputs::Base
           event["stack_trace"] = pretty_print_stack_trace(proxy)
         end
 
-        event["cstack"] = log4j_obj.getContextStack.to_a if log4j_obj.getContextStack  
+        event["cstack"] = log4j_obj.getContextStack.to_a if log4j_obj.getContextStack
         output_queue << event
       end # loop do
     rescue => e
